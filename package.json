@@ -1,12 +1,14 @@
 {
   "name": "fulfillhub",
   "private": true,
+  "type": "module",
   "version": "0.1.0",
   "description": "Shopify dropshipping/fulfillment platform — Turkey to GCC",
   "scripts": {
     "dev": "shopify app dev",
     "build": "remix vite:build",
-    "start": "remix-serve ./build/server/index.js",
+    "start": "node server.js",
+    "start:remix": "remix-serve ./build/server/index.js",
     "dev:admin-api": "tsx watch api/index.ts",
     "dev:admin-ui": "cd admin && npm run dev",
     "db:generate": "prisma generate",
@@ -20,6 +22,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.0.0",
+    "@remix-run/express": "^2.17.4",
     "@remix-run/node": "^2.17.0",
     "@remix-run/react": "^2.17.0",
     "@remix-run/serve": "^2.17.0",
