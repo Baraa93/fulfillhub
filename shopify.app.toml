@@ -1,0 +1,42 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "1004df70d308d436ab8c21bbe1a9c11f"
+name = "FulfillHub"
+application_url = "https://your-app-url.com"
+embedded = true
+
+[access_scopes]
+scopes = "read_products,write_products,read_orders,write_orders,read_fulfillments,write_fulfillments,read_shipping,read_customers"
+
+[auth]
+redirect_urls = [ "https://your-app-url.com/auth/callback" ]
+
+[webhooks]
+api_version = "2024-01"
+
+[[webhooks.subscriptions]]
+topics = [ "orders/paid" ]
+uri = "/webhooks"
+
+[[webhooks.subscriptions]]
+topics = [ "orders/updated" ]
+uri = "/webhooks"
+
+[[webhooks.subscriptions]]
+topics = [ "orders/cancelled" ]
+uri = "/webhooks"
+
+[[webhooks.subscriptions]]
+topics = [ "app/uninstalled" ]
+uri = "/webhooks"
+
+[[webhooks.subscriptions]]
+topics = [ "products/update" ]
+uri = "/webhooks"
+
+[[webhooks.subscriptions]]
+topics = [ "products/delete" ]
+uri = "/webhooks"
+
+[pos]
+embedded = false
