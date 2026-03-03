@@ -13,20 +13,22 @@ import {
   Text,
 } from "@shopify/polaris";
 import { useState } from "react";
+import { authenticate } from "~/shopify.server";
+import { getOrCreateSeller } from "~/seller.server";
 import { submitProductRequest } from "~/services/product-request.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const { session } = await authenticate.admin(request);
+  const seller = await getOrCreateSeller(session);
+
   const formData = await request.formData();
   const trendyolUrl = formData.get("trendyolUrl") as string;
   const notes = formData.get("notes") as string;
   const desiredCategory = formData.get("desiredCategory") as string;
 
-  // TODO: Get sellerId from Shopify session
-  const sellerId = "TODO_FROM_SESSION";
-
   try {
     const productRequest = await submitProductRequest(
-      sellerId,
+      seller.id,
       trendyolUrl,
       notes || undefined,
       desiredCategory || undefined,

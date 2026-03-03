@@ -11,25 +11,21 @@ import {
   Banner,
 } from "@shopify/polaris";
 import { getWalletTransactions } from "~/services/wallet.server";
-import { prisma } from "~/db.server";
+import { authenticate } from "~/shopify.server";
+import { getOrCreateSeller } from "~/seller.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  // TODO: Get sellerId from Shopify session
-  const sellerId = "TODO_FROM_SESSION";
+  const { session } = await authenticate.admin(request);
+  const seller = await getOrCreateSeller(session);
 
-  const seller = await prisma.seller.findUnique({
-    where: { id: sellerId },
-    select: { walletBalance: true, currency: true },
-  });
-
-  const { transactions, total } = await getWalletTransactions(sellerId, {
+  const { transactions, total } = await getWalletTransactions(seller.id, {
     page: 1,
     limit: 50,
   });
 
   return json({
-    balance: seller?.walletBalance || "0.00",
-    currency: seller?.currency || "USD",
+    balance: seller.walletBalance.toString(),
+    currency: seller.currency,
     transactions,
     total,
   });

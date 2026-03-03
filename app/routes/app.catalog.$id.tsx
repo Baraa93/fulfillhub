@@ -13,10 +13,14 @@ import {
   Banner,
   Thumbnail,
 } from "@shopify/polaris";
+import { authenticate } from "~/shopify.server";
+import { getOrCreateSeller } from "~/seller.server";
 import { prisma } from "~/db.server";
 import { importProductToShopify } from "~/services/shopify-product.server";
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
+  await authenticate.admin(request);
+
   const product = await prisma.catalogProduct.findUnique({
     where: { id: params.id },
     include: { variants: { where: { status: "ACTIVE" } } },
@@ -30,17 +34,15 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request, params }: ActionFunctionArgs) => {
+  const { session } = await authenticate.admin(request);
+  const seller = await getOrCreateSeller(session);
+
   const formData = await request.formData();
   const intent = formData.get("intent");
 
   if (intent === "import") {
-    // TODO: Get sellerId from Shopify session
-    // const { session } = await authenticate.admin(request);
-    // const seller = await prisma.seller.findUnique({ where: { shopDomain: session.shop } });
-    const sellerId = formData.get("sellerId") as string;
-
     try {
-      const result = await importProductToShopify(sellerId, params.id!);
+      const result = await importProductToShopify(seller.id, params.id!);
       return json({ success: true, shopifyProductId: result.shopifyProductId });
     } catch (error) {
       return json(
@@ -60,8 +62,6 @@ export default function CatalogProductDetail() {
   const handleImport = () => {
     const formData = new FormData();
     formData.set("intent", "import");
-    // In production, sellerId comes from session — not from form
-    formData.set("sellerId", "TODO_FROM_SESSION");
     submit(formData, { method: "post" });
   };
 

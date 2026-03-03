@@ -1,24 +1,29 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { Page, Layout, Card, Text, BlockStack, InlineGrid, Box } from "@shopify/polaris";
+import { authenticate } from "~/shopify.server";
+import { getOrCreateSeller } from "~/seller.server";
 import { prisma } from "~/db.server";
 
-// In production, use authenticate.admin(request) from shopify.server.ts
-// to get the session and seller ID.
-
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  // TODO: Replace with actual Shopify session authentication
-  // const { session } = await authenticate.admin(request);
-  // const seller = await prisma.seller.findUnique({ where: { shopDomain: session.shop } });
+  const { session } = await authenticate.admin(request);
+  const seller = await getOrCreateSeller(session);
 
-  // Placeholder data for scaffold
+  const [activeProducts, openOrders, pendingRequests] = await Promise.all([
+    prisma.sellerProduct.count({ where: { sellerId: seller.id, status: "ACTIVE" } }),
+    prisma.order.count({
+      where: { sellerId: seller.id, status: { in: ["PROCESSING", "PURCHASED", "ALLOCATED", "PACKED"] } },
+    }),
+    prisma.productRequest.count({ where: { sellerId: seller.id, status: "PENDING" } }),
+  ]);
+
   return json({
-    shopName: "Your Store",
+    shopName: seller.shopName || seller.shopDomain,
     stats: {
-      activeProducts: 0,
-      openOrders: 0,
-      walletBalance: "0.00",
-      pendingRequests: 0,
+      activeProducts,
+      openOrders,
+      walletBalance: seller.walletBalance.toString(),
+      pendingRequests,
     },
   });
 };

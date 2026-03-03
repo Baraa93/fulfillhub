@@ -14,6 +14,8 @@ import {
   Pagination,
   Select,
 } from "@shopify/polaris";
+import { authenticate } from "~/shopify.server";
+import { getOrCreateSeller } from "~/seller.server";
 import { getSellerOrders } from "~/services/order.server";
 
 const STATUS_BADGE_MAP: Record<string, { tone: any; label: string }> = {
@@ -30,14 +32,14 @@ const STATUS_BADGE_MAP: Record<string, { tone: any; label: string }> = {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const { session } = await authenticate.admin(request);
+  const seller = await getOrCreateSeller(session);
+
   const url = new URL(request.url);
   const status = url.searchParams.get("status") || undefined;
   const page = Number(url.searchParams.get("page")) || 1;
 
-  // TODO: Get sellerId from Shopify session
-  const sellerId = "TODO_FROM_SESSION";
-
-  const result = await getSellerOrders(sellerId, {
+  const result = await getSellerOrders(seller.id, {
     status: status as any,
     page,
     limit: 20,
