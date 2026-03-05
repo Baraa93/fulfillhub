@@ -9,6 +9,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin" },
+  { label: "Orders", href: "/admin/orders" },
+  { label: "Catalog", href: "/admin/catalog" },
+  { label: "Product Requests", href: "/admin/product-requests" },
+  { label: "Packing", href: "/admin/packing" },
+  { label: "Shipping", href: "/admin/shipping" },
+  { label: "Sellers", href: "/admin/sellers" },
   { label: "Shipping Rules", href: "/admin/shipping-rules" },
   { label: "Warehouse", href: "/admin/warehouse" },
   { label: "Settings", href: "/admin/settings" },
