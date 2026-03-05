@@ -509,6 +509,16 @@ enum ActorType {
 }
 
 // ─────────────────────────────────────────────
+// APP SETTINGS (key-value config store)
+// ─────────────────────────────────────────────
+
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
 // SHIPPING RULES
 // ─────────────────────────────────────────────
 

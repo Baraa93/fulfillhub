@@ -79,7 +79,7 @@ export interface CarrierConnector {
   generateLabel(trackingNumber: string): Promise<LabelData>;
 }
 
-// Warehouse address (configurable via env)
+// Warehouse address — static fallback (used when DB is unavailable)
 export const WAREHOUSE_ADDRESS: Address = {
   name: "FulfillHub Warehouse",
   company: "FulfillHub",
@@ -91,3 +91,35 @@ export const WAREHOUSE_ADDRESS: Address = {
   phone: process.env.WAREHOUSE_PHONE || "+905001234567",
   email: process.env.WAREHOUSE_EMAIL || "ops@fulfillhub.com",
 };
+
+/**
+ * Reads warehouse address from AppSetting (admin-configurable),
+ * falling back to env vars / defaults above.
+ */
+export async function getWarehouseAddress(): Promise<Address> {
+  try {
+    const { prisma } = await import("~/db.server");
+    const rows = await prisma.appSetting.findMany({
+      where: { key: { startsWith: "warehouse." } },
+    });
+    if (rows.length === 0) return WAREHOUSE_ADDRESS;
+
+    const m: Record<string, string> = {};
+    for (const r of rows) m[r.key] = r.value;
+
+    return {
+      name: m["warehouse.name"] || WAREHOUSE_ADDRESS.name,
+      company: m["warehouse.company"] || WAREHOUSE_ADDRESS.company,
+      line1: m["warehouse.line1"] || WAREHOUSE_ADDRESS.line1,
+      line2: m["warehouse.line2"] || WAREHOUSE_ADDRESS.line2,
+      city: m["warehouse.city"] || WAREHOUSE_ADDRESS.city,
+      province: m["warehouse.province"] || WAREHOUSE_ADDRESS.province,
+      country: m["warehouse.country"] || WAREHOUSE_ADDRESS.country,
+      zip: m["warehouse.zip"] || WAREHOUSE_ADDRESS.zip,
+      phone: m["warehouse.phone"] || WAREHOUSE_ADDRESS.phone,
+      email: m["warehouse.email"] || WAREHOUSE_ADDRESS.email,
+    };
+  } catch {
+    return WAREHOUSE_ADDRESS;
+  }
+}
