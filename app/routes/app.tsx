@@ -23,6 +23,7 @@ export default function App() {
         <a href="/app/orders">Orders</a>
         <a href="/app/wallet">Wallet</a>
         <a href="/app/requests/new">Request Product</a>
+        <a href="/app/settings">Settings</a>
       </ui-nav-menu>
       <Outlet />
     </AppProvider>
